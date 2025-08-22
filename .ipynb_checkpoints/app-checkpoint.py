@@ -52,11 +52,11 @@ import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neighbors import KNeighborsRegressor
-from xgboost import XGBRegressor  # optional, but enabled here
+from xgboost import XGBRegressor 
 
 from sklearn.metrics import (
     mean_absolute_error,
-    mean_squared_error,
+    root_mean_squared_error,
     r2_score,
     median_absolute_error,
     explained_variance_score,
@@ -211,7 +211,7 @@ def _metrics_block(y_true, y_pred, k_for_overlap=20):
     """
     return {
         "MAE": mean_absolute_error(y_true, y_pred),
-        "RMSE": mean_squared_error(y_true, y_pred, squared=False),
+        "RMSE": root_mean_squared_error(y_true=y_true, y_pred=y_pred),
         "R²": r2_score(y_true, y_pred),
         "ExplainedVar": explained_variance_score(y_true, y_pred),
         "MedAE": median_absolute_error(y_true, y_pred),
@@ -983,7 +983,7 @@ with tab_err:
     q = min(10, max(3, int(len(yhat_aligned)//100)))  # target ~100 samples/bin
     q = max(q, 3)
     bins = pd.qcut(pd.Series(yhat_aligned), q=q, duplicates="drop")
-    cal_df = pd.DataFrame({"pred": yhat_aligned, "act": y_true_aligned, "bin": bins}).groupby("bin").agg(
+    cal_df = pd.DataFrame({"pred": yhat_aligned, "act": y_true_aligned, "bin": bins}).groupby("bin", observed=True).agg(
         mean_pred=("pred","mean"), mean_act=("act","mean"), n=("act","size")
     ).reset_index(drop=True)
 
